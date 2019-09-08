@@ -3,7 +3,7 @@ package com.ssn.forum
 import java.time.Instant
 
 import com.ssn.forum.db.PersistentPost
-import com.ssn.forum.domain.{Email, Topic}
+import com.ssn.forum.domain.{Email, Nickname, Subject, Topic}
 import io.circe._
 import io.circe.generic.semiauto._
 
@@ -32,16 +32,16 @@ object responses {
     implicit val encoder: Encoder[TopicListResponse] = deriveEncoder
   }
 
-  case class PostListResponse(posts: List[PostBasicResponse])
+  case class PostListResponse(posts: Seq[PostBasicResponse])
 
   object PostListResponse {
-    def from(posts: List[PersistentPost]): PostListResponse =
+    def from(posts: Seq[PersistentPost]): PostListResponse =
       PostListResponse(posts.map(PostBasicResponse.from))
 
     implicit val encoder: Encoder[PostListResponse] = deriveEncoder
   }
 
-  case class PostBasicResponse(id: PostId, nickname: String, email: Email, text: String, createdAt: Instant)
+  case class PostBasicResponse(id: PostId, nickname: Nickname, email: Email, text: String, createdAt: Instant)
 
   object PostBasicResponse {
     def from(post: PersistentPost): PostBasicResponse =
@@ -50,7 +50,7 @@ object responses {
     implicit val encoder: Encoder[PostBasicResponse] = deriveEncoder
   }
 
-  case class TopicBasicResponse(id: TopicId, subject: String, lastPost: Instant)
+  case class TopicBasicResponse(id: TopicId, subject: Subject, lastPost: Instant)
 
   object TopicBasicResponse {
     def from(topic: Topic.WithLastPostDate): TopicBasicResponse =

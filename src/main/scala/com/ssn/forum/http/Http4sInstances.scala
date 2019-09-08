@@ -5,9 +5,9 @@ import cats.syntax.all._
 import cats.{Applicative, MonadError}
 import com.ssn.forum.exceptions.CannotDecodeRequestBody
 import com.ssn.forum.http.Http4sDecoding.RequestOps
-import io.circe.{Decoder, Encoder}
+import io.circe.{Decoder, DecodingFailure, Encoder}
 import org.http4s.circe.{jsonEncoderOf, jsonOf}
-import org.http4s.{EntityDecoder, EntityEncoder, MessageBodyFailure, Request}
+import org.http4s._
 
 import scala.reflect.ClassTag
 
@@ -31,8 +31,11 @@ object Http4sDecoding {
   final class RequestOps[F[_]](val r: Request[F]) extends AnyVal {
     def decodeAs[A](implicit ME: MonadError[F, Throwable], D: EntityDecoder[F, A], C: ClassTag[A]): F[A] =
       r.as[A].adaptError {
-        case ex: MessageBodyFailure => CannotDecodeRequestBody(C.runtimeClass, ex.cause, ex)
-        case ex: Throwable          => CannotDecodeRequestBody(C.runtimeClass, None, ex)
+        case ex @ InvalidMessageBodyFailure(_, Some(df: DecodingFailure)) =>
+          CannotDecodeRequestBody(C.runtimeClass, df.message, Some(ex))
+        case ex: MalformedMessageBodyFailure =>
+          CannotDecodeRequestBody(C.runtimeClass, ex.details, Some(ex))
+        case ex: Throwable => CannotDecodeRequestBody(C.runtimeClass, ex.getMessage, Some(ex))
       }
   }
 }

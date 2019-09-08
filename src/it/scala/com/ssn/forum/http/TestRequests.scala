@@ -1,5 +1,6 @@
 package com.ssn.forum.http
 
+import java.net.URI
 import java.util.UUID
 
 import cats.{Functor, MonadError}
@@ -127,6 +128,15 @@ trait TestRequests {
       .response(asString)
       .send()
     request.map(extractHeadersAndStringBody(_, url))
+  }
+
+  def get(endpoint: String): IO[HttpResponse[String]] = {
+    val uri = Uri(URI.create("http://localhost:8080" + endpoint))
+    val request = sttp
+      .get(uri)
+      .response(asString)
+      .send()
+    request.map(extractHeadersAndStringBody(_, uri))
   }
 
   def createPostRaw[A: BodySerializer](

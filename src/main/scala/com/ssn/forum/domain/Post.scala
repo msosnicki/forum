@@ -4,4 +4,4 @@ import java.time.Instant
 
 import com.ssn.forum._
 
-case class Post(text: String, nickname: String, email: Email, createdAt: Instant, _topicId: TopicId)
+case class Post(text: String, nickname: Nickname, email: Email, createdAt: Instant, _topicId: TopicId)

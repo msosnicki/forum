@@ -1,13 +1,13 @@
 package com.ssn.forum.db
 
 import com.ssn.forum._
-import com.ssn.forum.domain.{Email, Topic}
+import com.ssn.forum.domain.{Email, Nickname, Subject, Topic}
 import doobie._
 import doobie.postgres.implicits.UuidType
 
 object Doobie extends CustomDbTypes {
   object Topics extends Repository.Topics[ConnectionIO] {
-    override def insert(subject: String): ConnectionIO[PersistentTopic] =
+    override def insert(subject: Subject): ConnectionIO[PersistentTopic] =
       Query.Topics
         .insert(subject)
         .withUniqueGeneratedKeys[PersistentTopic]("id", "subject")
@@ -20,7 +20,12 @@ object Doobie extends CustomDbTypes {
   }
 
   object Posts extends Repository.Posts[ConnectionIO] {
-    override def insert(topicId: TopicId, text: String, nickname: String, email: Email): ConnectionIO[PersistentPost] =
+    override def insert(
+        topicId: TopicId,
+        text: String,
+        nickname: Nickname,
+        email: Email
+    ): ConnectionIO[PersistentPost] =
       Query.Posts
         .insert(topicId, text, nickname, email)
         .withUniqueGeneratedKeys("id", "text", "nickname", "email", "created_at", "topic_id")
@@ -37,13 +42,13 @@ object Doobie extends CustomDbTypes {
         .run
         .map(_ > 0)
 
-    override def listPostsAround(
+    override def listPostsAround[G[_]](
         topicId: TopicId,
         postId: PostId,
         before: Int,
         after: Int
-    ): ConnectionIO[List[PersistentPost]] =
-      Query.Posts.listPostsAround(topicId, postId, before, after).to[List]
+    )(implicit B: Collection[PersistentPost, G]): ConnectionIO[G[PersistentPost]] =
+      Query.Posts.listPostsAround(topicId, postId, before, after).to[G]
   }
 
   object PostsSecurity extends Repository.PostsSecurity[ConnectionIO] {

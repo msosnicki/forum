@@ -1,18 +1,18 @@
 package com.ssn.forum
 
-import com.ssn.forum.domain.Email
+import com.ssn.forum.domain.{Email, Nickname, Subject}
 import io.circe._
 import io.circe.generic.semiauto._
 
 object requests {
 
-  case class CreateTopicRequest(subject: String, text: String, nickname: String, email: Email)
+  case class CreateTopicRequest(subject: Subject, text: String, nickname: Nickname, email: Email)
 
   object CreateTopicRequest {
     implicit val decoder: Decoder[CreateTopicRequest] = deriveDecoder
   }
 
-  case class CreatePostRequest(text: String, nickname: String, email: Email)
+  case class CreatePostRequest(text: String, nickname: Nickname, email: Email)
 
   object CreatePostRequest {
     implicit val decoder: Decoder[CreatePostRequest] = deriveDecoder

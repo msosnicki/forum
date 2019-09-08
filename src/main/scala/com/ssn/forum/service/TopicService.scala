@@ -5,11 +5,11 @@ import cats.effect.Sync
 import cats.~>
 import com.ssn.forum._
 import com.ssn.forum.db.{PersistentTopic, Repository}
-import com.ssn.forum.domain.Topic
+import com.ssn.forum.domain.{Subject, Topic}
 
 final class TopicService[DB[_], F[_]](repo: Repository.Topics[DB], transact: DB ~> F)(implicit S: Sync[F])
     extends TopicService.Algebra[F] {
-  override def createTopic(subject: String): F[TopicId] =
+  override def createTopic(subject: Subject): F[TopicId] =
     transact(repo.insert(subject)).map(_.id)
 
   override def listLastActive(offset: TopicId, limit: Int): F[List[Topic.WithLastPostDate]] =
@@ -18,7 +18,7 @@ final class TopicService[DB[_], F[_]](repo: Repository.Topics[DB], transact: DB 
 
 object TopicService {
   abstract class Algebra[F[_]] {
-    def createTopic(subject: String): F[TopicId]
+    def createTopic(subject: Subject): F[TopicId]
     def listLastActive(offset: Long, limit: Int): F[List[Topic.WithLastPostDate]]
   }
 }

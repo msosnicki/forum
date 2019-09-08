@@ -1,6 +1,6 @@
 package com.ssn.forum.db
 
-import com.ssn.forum.domain.{Email, Topic}
+import com.ssn.forum.domain.{Email, Nickname, Subject, Topic}
 import com.ssn.forum.{PostId, Token, TopicId}
 import doobie._
 import doobie.implicits._
@@ -8,7 +8,7 @@ import doobie.postgres.implicits.UuidType
 
 object Query extends CustomDbTypes {
   object Topics {
-    def insert(subject: String): Update0 =
+    def insert(subject: Subject): Update0 =
       sql"insert into topic (subject) values ($subject)".update
     def listLastActive(offset: Long, limit: Int): Query0[Topic.WithLastPostDate] =
       sql"""select * from (
@@ -27,7 +27,7 @@ object Query extends CustomDbTypes {
 
   object Posts {
 
-    def insert(topicId: TopicId, text: String, nickname: String, email: Email): Update0 =
+    def insert(topicId: TopicId, text: String, nickname: Nickname, email: Email): Update0 =
       sql"insert into post (topic_id, text, nickname, email) values ($topicId, $text, $nickname, $email)".update
     def edit(topicId: TopicId, postId: PostId, text: String): Update0 =
       sql"update post set text = $text where topic_id = $topicId and id = $postId".update

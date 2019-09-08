@@ -12,15 +12,15 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.dsl.impl.{OptionalQueryParamDecoderMatcher, QueryParamDecoderMatcher}
 
 final class ForumHttp[F[_]](
-    config: AppConfig,
+    paginationLimit: Int,
     topicService: TopicService.Algebra[F],
     postService: PostService.Algebra[F]
 ) extends Http4sDsl[F]
     with Http4sInstances {
   import ForumHttp._
 
-  private val limitValidator  = validator.validateLimit(config.limit)(_)
-  private val cropBeforeAfter = validator.validateBeforeAndAfter(config.limit)(_, _)
+  private val limitValidator  = Validator.validateLimit(paginationLimit)(_)
+  private val cropBeforeAfter = Validator.validateBeforeAndAfter(paginationLimit)(_, _)
 
   def openEndpoints(implicit S: Sync[F]): HttpRoutes[F] = HttpRoutes.of[F] {
     case req @ POST -> Root / "topic" =>
@@ -46,9 +46,12 @@ final class ForumHttp[F[_]](
     case GET -> Root / "topic" / LongVar(topicId) / "post" / LongVar(postId)
           :? BeforeMatcher(before) +& AfterMatcher(after) =>
       for {
-        (b, a) <- cropBeforeAfter(before, after).liftTo[F]
-        list   <- postService.listPostsAround(topicId, postId, b, a)
-        resp   <- Ok(PostListResponse.from(list))
+        ba <- cropBeforeAfter(before, after).liftTo[F]
+        list <- if (ba.cropped)
+          postService.listPostsAroundWithAdjustment(topicId, postId, ba.before, ba.after)
+        else
+          postService.listPostsAround(topicId, postId, ba.before, ba.after)
+        resp <- Ok(PostListResponse.from(list))
       } yield resp
   }
 

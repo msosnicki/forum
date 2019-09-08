@@ -7,7 +7,7 @@ object Dependencies {
     val Http4s     = "0.20.6"
     val Circe      = "0.11.1"
     val Doobie     = "0.7.0"
-    val Postgres   = "9.1-901-1.jdbc4"
+    val Postgres   = "42.2.6"
     val Atto       = "0.6.5"
     val Enumeratum = "1.5.13"
     val Logback    = "1.2.3"
@@ -31,7 +31,7 @@ object Dependencies {
   lazy val Doobie         = "org.tpolecat" %% "doobie-core"     % Version.Doobie
   lazy val DoobiePostgres = "org.tpolecat" %% "doobie-postgres" % Version.Doobie
 
-  lazy val Postgres = "postgresql" % "postgresql" % Version.Postgres
+  lazy val Postgres = "org.postgresql" % "postgresql" % Version.Postgres
 
   lazy val Atto = "org.tpolecat" %% "atto-core" % Version.Atto
 
@@ -44,12 +44,12 @@ object Dependencies {
 
   lazy val Guava = "com.google.guava" % "guava" % Version.Guava
 
-  lazy val Sttp      = "com.softwaremill.sttp" %% "core"                           % Version.Sttp % Test
-  lazy val SttpCats  = "com.softwaremill.sttp" %% "async-http-client-backend-cats" % Version.Sttp % Test
-  lazy val SttpCirce = "com.softwaremill.sttp" %% "circe"                          % Version.Sttp % Test
+  lazy val Sttp      = "com.softwaremill.sttp" %% "core"                           % Version.Sttp % "it,test"
+  lazy val SttpCats  = "com.softwaremill.sttp" %% "async-http-client-backend-cats" % Version.Sttp % "it,test"
+  lazy val SttpCirce = "com.softwaremill.sttp" %% "circe"                          % Version.Sttp % "it,test"
 
-  lazy val ScalaTest = "org.scalatest" %% "scalatest" % Version.ScalaTest % Test
+  lazy val ScalaTest = "org.scalatest" %% "scalatest" % Version.ScalaTest % "it,test"
 
-  lazy val ScalaCheck = "org.scalacheck" %% "scalacheck" % Version.ScalaCheck % Test
+  lazy val ScalaCheck = "org.scalacheck" %% "scalacheck" % Version.ScalaCheck % "it,test"
 
 }

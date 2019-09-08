@@ -7,7 +7,7 @@ import cats.implicits._
 import cats.data.{EitherT, Kleisli, OptionT}
 import com.ssn.forum.{PostId, Token}
 import com.ssn.forum.exceptions._
-import com.ssn.forum.http.HttpErrorHandler
+import com.ssn.forum.http.{HttpErrorHandler, PassThroughException}
 import com.ssn.forum.service.PostService
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{AuthedRoutes, Headers, Request}

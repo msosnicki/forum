@@ -15,27 +15,22 @@ final class HttpErrorHandler[F[_]: Sync] extends Http4sDsl[F] with Http4sInstanc
 
   val authErrorHandler: AuthException => F[Response[F]] = ex => Forbidden(ErrorResponse(ex.msg))
 
-  val httpErrorHandler: HttpException => F[Response[F]] = {
-    case ex: CannotDecodeRequestBody => BadRequest(ErrorResponse(ex.cause.getOrElse(ex).getMessage))
-    case PassThroughException        => InternalServerError(ErrorResponse("This shouldn't happen!"))
-  }
-
   val serviceErrorHandler: ServiceException => F[Response[F]] = {
     case ex: PaginateLimitException => BadRequest(ErrorResponse(ex.getMessage))
     case BeforeOrAfterNegative      => BadRequest(ErrorResponse(BeforeOrAfterNegative.getMessage))
   }
 
-  val handler: AppException => F[Response[F]] = {
-    case ex: AuthException    => authErrorHandler(ex)
-    case ex: HttpException    => httpErrorHandler(ex)
-    case ex: ServiceException => serviceErrorHandler(ex)
+  val handler: HttpException => F[Response[F]] = {
+    case ex: AuthException           => authErrorHandler(ex)
+    case ex: ServiceException        => serviceErrorHandler(ex)
+    case ex: CannotDecodeRequestBody => BadRequest(ErrorResponse(ex.getMessage))
   }
 
   def handle(routes: HttpRoutes[F]): HttpRoutes[F] = Kleisli { req: Request[F] =>
     OptionT {
       routes.run(req).value.handleErrorWith { ex =>
         (ex match {
-          case ex: AppException =>
+          case ex: HttpException =>
             handler(ex)
           case NonFatal(ex) =>
             log.error[F]("Internal error occurred.", Some(ex)) *>

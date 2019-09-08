@@ -1,12 +1,14 @@
 import Dependencies._
 
 lazy val root = (project in file("."))
+  .configs(IntegrationTest)
   .settings(
     organization := "com.ssn",
     name := "forum",
     version := "0.0.1-SNAPSHOT",
     scalaVersion := "2.12.8",
     mainClass in assembly := Some("com.ssn.forum.Main"),
+    Defaults.itSettings,
     scalacOptions := Seq(
       "-deprecation",
       "-encoding",
